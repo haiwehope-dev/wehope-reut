@@ -32,8 +32,9 @@
 .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label { font-size: 0.82rem; font-weight: 600; color: var(–muted); }
-.field input { border: 1.5px solid var(–border); border-radius: 8px; padding: 10px 14px; font-size: 0.95rem; font-family: ‘Heebo’, sans-serif; color: var(–text); background: #fafbfd; transition: border-color 0.2s; outline: none; }
-.field input:focus { border-color: var(–blue-light); box-shadow: 0 0 0 3px rgba(45,95,166,0.12); background: white; }
+.field input, .field select { border: 1.5px solid var(–border); border-radius: 8px; padding: 10px 14px; font-size: 0.95rem; font-family: ‘Heebo’, sans-serif; color: var(–text); background: #fafbfd; transition: border-color 0.2s; outline: none; }
+.field select { cursor: pointer; }
+.field input:focus, .field select:focus { border-color: var(–blue-light); box-shadow: 0 0 0 3px rgba(45,95,166,0.12); background: white; }
 .field input[readonly] { background: #eef2f8; color: var(–blue); font-weight: 600; cursor: default; }
 
 .optional-badge { font-size: 0.72rem; background: #e8f0fe; color: var(–blue-light); border-radius: 10px; padding: 2px 8px; margin-right: 6px; font-weight: 500; }
@@ -116,7 +117,16 @@ canvas.sig-canvas.signed { border-color: var(–blue); border-style: solid; back
       </div>
       <div class="field">
         <label>דגם המוצר <span class="optional-badge">אופציונלי</span></label>
-        <input type="text" id="model" placeholder="לדוגמה: קלנועית X1">
+        <select id="model">
+          <option value="">בחר דגם</option>
+          <option value="סולקס">סולקס</option>
+          <option value="S21">S21</option>
+          <option value="S19">S19</option>
+          <option value="iMoving">iMoving</option>
+          <option value="FDB01">FDB01</option>
+          <option value="קוסין">קוסין</option>
+          <option value="CTM">CTM</option>
+        </select>
       </div>
     </div>
     <div class="grid2" style="margin-bottom:18px;">
@@ -147,9 +157,27 @@ canvas.sig-canvas.signed { border-color: var(–blue); border-style: solid; back
         <input type="text" value="120 ₪" readonly>
       </div>
     </div>
-    <div style="margin-top:14px; padding:10px 14px; background:#f0f5ff; border-radius:8px; font-size:0.88rem; color:var(--blue-light); display:flex; justify-content:space-between;">
+    <div class="grid2" style="margin-top:18px;">
+      <div class="field">
+        <label>אופן קבלת המוצר</label>
+        <select id="delivery-method">
+          <option value="delivery">משלוח (250 ₪)</option>
+          <option value="pickup">איסוף עצמי מהסניף (ללא עלות)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>עלות שילוח</label>
+        <input type="text" id="shipping-display" value="250 ₪" readonly>
+      </div>
+    </div>
+    <div class="field" style="margin-top:18px;">
+      <label>המלצה</label>
+      <input type="text" value="💡 מומלץ לקחת את הקלנועית יום לפני הטיסה" readonly>
+    </div>
+    <div style="margin-top:14px; padding:10px 14px; background:#f0f5ff; border-radius:8px; font-size:0.88rem; color:var(--blue-light); display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;">
       <span>סה"כ ימי שכירות: <strong id="days-count">—</strong></span>
-      <span>סה"כ לתשלום: <strong id="total-cost">—</strong></span>
+      <span>שילוח: <strong id="shipping-line">250 ₪</strong></span>
+      <span>סה"כ לתשלום (כולל שילוח): <strong id="total-cost">—</strong></span>
     </div>
   </div>
 
@@ -163,7 +191,7 @@ canvas.sig-canvas.signed { border-color: var(–blue); border-style: solid; back
       <li>חברת WeHope לא תישא באחריות לכל נזק שיגרם לשוכר, למשתמש או לצד שלישי, כתוצאה ישירה או עקיפה מהשימוש במוצר.</li>
       <li>השוכר מתחייב להחזיר את הקלנועית באותו מצב בו קיבל אותה, למעט בלאי סביר.</li>
       <li>במקרה של נזק לקלנועית, יידרש השוכר לשאת בעלות התיקון והשבתה למצב תקין.</li>
-      <li>היה ואם הקלנועית תיגנב או תישבר באופן שאינו ניתן לתיקון, יחויב השוכר בסכום של 6,000 ₪.</li>
+      <li>היה ואם הקלנועית תיגנב או תישבר באופן שאינו ניתן לתיקון, יחויב השוכר בסכום של 10,800 ₪.</li>
       <li>השכרה לחו"ל: השירות והאחריות אינם תקפים מחוץ לגבולות המדינה.</li>
       <li class="highlight"><strong>ביטול השכרה:</strong> השוכר רשאי לבטל את ההשכרה בכל עת. במקרה של ביטול יחויב השוכר בדמי ביטול בסך 120 ₪, ללא קשר למועד הביטול. דמי הביטול ייגבו מכרטיס האשראי שנמסר כערבון. לא יינתן החזר על ימי שכירות שכבר חלפו.</li>
     </ol>
@@ -281,19 +309,37 @@ initCanvas('sig-renter');
 // ── Date / cost ───────────────────────────────────────────────────
 document.getElementById('start-date').addEventListener('change', calcTotal);
 document.getElementById('end-date').addEventListener('change', calcTotal);
+document.getElementById('delivery-method').addEventListener('change', calcTotal);
+
+function getShippingCost() {
+  return document.getElementById('delivery-method').value === 'pickup' ? 0 : 250;
+}
+
+// The office is closed Fridays and Saturdays - no pickup or delivery those days
+function isWeekendDay(dateStr) {
+  if (!dateStr) return false;
+  const day = new Date(dateStr + 'T00:00:00').getDay();
+  return day === 5 || day === 6;
+}
+
 function calcTotal() {
   const s = document.getElementById('start-date').value;
   const e = document.getElementById('end-date').value;
-  if (!s || !e) return;
-  const diff = Math.ceil((new Date(e) - new Date(s)) / 86400000);
-  if (diff > 0) {
-    document.getElementById('days-count').textContent = diff + ' ימים';
-    document.getElementById('total-cost').textContent = (diff * 120).toLocaleString('he-IL') + ' ₪';
-  } else {
+  const shipping = getShippingCost();
+  document.getElementById('shipping-display').value = shipping === 0 ? 'ללא עלות' : shipping + ' ₪';
+  document.getElementById('shipping-line').textContent = shipping === 0 ? 'ללא עלות (איסוף עצמי)' : shipping + ' ₪';
+
+  if (!s || !e || e < s || isWeekendDay(s) || isWeekendDay(e)) {
     document.getElementById('days-count').textContent = '—';
     document.getElementById('total-cost').textContent = '—';
+    return;
   }
+  // Both the pickup day and the return day are billable days (inclusive count)
+  const diff = Math.round((new Date(e) - new Date(s)) / 86400000) + 1;
+  document.getElementById('days-count').textContent = diff + ' ימים';
+  document.getElementById('total-cost').textContent = (diff * 120 + shipping).toLocaleString('he-IL') + ' ₪';
 }
+calcTotal();
 
 // ── CC formatting ────────────────────────────────────────────────
 document.getElementById('cc-num').addEventListener('input', function(e) {
@@ -322,10 +368,26 @@ function validate() {
   const start = document.getElementById('start-date').value;
   const end = document.getElementById('end-date').value;
 
+  const weekendMsg = 'לא ניתן לאסוף / לקבל משלוח בימי שישי ושבת - נא לבחור יום אחר';
+
   if (!name) { setErr('f-name','err-name',true); ok=false; } else setErr('f-name','err-name',false);
   if (!id || id.length < 5) { setErr('f-id','err-id',true); ok=false; } else setErr('f-id','err-id',false);
-  if (!start) { setErr('f-start','err-start',true); ok=false; } else setErr('f-start','err-start',false);
-  if (!end || end <= start) { setErr('f-end','err-end',true); ok=false; } else setErr('f-end','err-end',false);
+
+  if (!start) {
+    document.getElementById('err-start').textContent = 'נא לבחור תאריך';
+    setErr('f-start','err-start',true); ok=false;
+  } else if (isWeekendDay(start)) {
+    document.getElementById('err-start').textContent = weekendMsg;
+    setErr('f-start','err-start',true); ok=false;
+  } else setErr('f-start','err-start',false);
+
+  if (!end || end < start) {
+    document.getElementById('err-end').textContent = 'נא לבחור תאריך החזרה';
+    setErr('f-end','err-end',true); ok=false;
+  } else if (isWeekendDay(end)) {
+    document.getElementById('err-end').textContent = weekendMsg;
+    setErr('f-end','err-end',true); ok=false;
+  } else setErr('f-end','err-end',false);
 
   const sigEmpty = isSigEmpty('sig-renter');
   document.getElementById('err-sig').classList.toggle('show', sigEmpty);
@@ -352,6 +414,7 @@ function buildShareText() {
   const today = new Date().toLocaleDateString('he-IL');
   const cc = document.getElementById('cc-num').value;
   const ccText = cc ? `\nכרטיס אשראי: **** **** **** ${cc.replace(/\s/g,'').slice(-4)}` : '';
+  const deliveryLabel = document.getElementById('delivery-method').value === 'pickup' ? 'איסוף עצמי מהסניף (ללא עלות)' : 'משלוח (250 ₪)';
 
   return `✅ *חוזה השכרת קלנועית – WeHope*
 ━━━━━━━━━━━━━━━━━━
@@ -361,7 +424,9 @@ function buildShareText() {
 📅 תאריך החזרה: ${end}
 ${model ? `🛵 דגם: ${model}` : ''}
 🗓️ ימי שכירות: ${days}
-💰 סה"כ לתשלום: ${total}${ccText}
+🚚 אופן קבלה: ${deliveryLabel}
+💰 סה"כ לתשלום (כולל שילוח): ${total}${ccText}
+💡 מומלץ לקחת את הקלנועית יום לפני הטיסה
 ━━━━━━━━━━━━━━━━━━
 📋 *תנאי החוזה*
 1. המוצר נבדק ותקין. תקלות – להחזיר לרח' חפץ חיים 12.
@@ -369,7 +434,7 @@ ${model ? `🛵 דגם: ${model}` : ''}
 3. WeHope לא אחראית לנזקים ישירים או עקיפים.
 4. יש להחזיר במצב תקין (למעט בלאי סביר).
 5. נזק לקלנועית – השוכר נושא בעלויות התיקון.
-6. גניבה / נזק בלתי הפיך – חיוב של 6,000 ₪.
+6. גניבה / נזק בלתי הפיך – חיוב של 10,800 ₪.
 7. השירות אינו תקף מחוץ לגבולות המדינה.
 8. ביטול: דמי ביטול 120 ₪ ללא קשר למועד.
 ━━━━━━━━━━━━━━━━━━
@@ -411,6 +476,7 @@ async function generatePDF() {
   const cc = document.getElementById('cc-num').value;
   const ccExp = document.getElementById('cc-exp').value;
   const today = new Date().toLocaleDateString('he-IL');
+  const deliveryLabel = document.getElementById('delivery-method').value === 'pickup' ? 'איסוף עצמי מהסניף (ללא עלות)' : 'משלוח (250 ש"ח)';
 
   // We render Hebrew text on an offscreen canvas, then embed as image
   function hebrewImg(text, fontSize, bold, color, maxWidth) {
@@ -490,7 +556,9 @@ async function generatePDF() {
   if (model) row('דגם המוצר', model);
   row('מחיר ליום', '120 ש"ח');
   row('ימי שכירות', days);
-  row('סה"כ לתשלום', total);
+  row('אופן קבלה', deliveryLabel);
+  row('סה"כ לתשלום (כולל שילוח)', total);
+  row('המלצה', 'מומלץ לקחת יום לפני הטיסה');
   y += 3;
 
   secHeader('תנאי החוזה');
@@ -500,7 +568,7 @@ async function generatePDF() {
     '.3 WeHope לא תישא באחריות לנזק ישיר או עקיף מהשימוש במוצר.',
     '.4 השוכר מתחייב להחזיר את הקלנועית באותו מצב, למעט בלאי סביר.',
     '.5 נזק לקלנועית – השוכר יישא בעלות התיקון.',
-    '.6 גניבה או נזק בלתי הפיך – חיוב של 6,000 ש"ח.',
+    '.6 גניבה או נזק בלתי הפיך – חיוב של 10,800 ש"ח.',
     '.7 השכרה לחו"ל: השירות והאחריות אינם תקפים מחוץ לגבולות המדינה.',
     '.8 ביטול: דמי ביטול 120 ש"ח ללא קשר למועד הביטול.',
   ];
@@ -549,12 +617,40 @@ async function generatePDF() {
   doc.save(`wehope-${name.replace(/\s+/g,'_')}.pdf`);
 }
 
+// ── Google Sheets logging ───────────────────────────────────────────
+// Paste the Web App URL from your deployed Google Apps Script here (see setup instructions).
+const SHEET_WEBAPP_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+function logToSheet() {
+  if (!SHEET_WEBAPP_URL || SHEET_WEBAPP_URL.indexOf('PASTE_') === 0) return;
+  const deliveryLabel = document.getElementById('delivery-method').value === 'pickup' ? 'איסוף עצמי מהסניף' : 'משלוח';
+  const payload = {
+    timestamp: new Date().toLocaleString('he-IL'),
+    name: document.getElementById('renter-name').value.trim(),
+    id: document.getElementById('renter-id').value.trim(),
+    model: document.getElementById('model').value.trim(),
+    startDate: formatDate(document.getElementById('start-date').value),
+    endDate: formatDate(document.getElementById('end-date').value),
+    days: document.getElementById('days-count').textContent,
+    delivery: deliveryLabel,
+    total: document.getElementById('total-cost').textContent
+  };
+  fetch(SHEET_WEBAPP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).catch(() => {}); // best-effort - never block the customer's flow on a logging failure
+}
+
 // ── Submit ────────────────────────────────────────────────────────
 async function submitForm(action) {
   if (!validate()) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     return;
   }
+
+  logToSheet();
 
   if (action === 'pdf') {
     const btn = document.getElementById('btn-submit');
